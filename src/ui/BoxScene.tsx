@@ -6,8 +6,9 @@
  *   1. le boîtier arrive en tournant et se pose ;
  *   2. la LED clignote comme pendant la connexion OBD, puis reste fixe ;
  *   3. le logo s'allume en vert, le feu vert du sapin.
- * Ensuite il flotte, suit la souris, pivote au défilement pour montrer sa
- * prise, et se laisse tourner à la main (il revient en place quand on lâche).
+ * Ensuite il tourne sur lui-même comme sur un présentoir, flotte, s'incline
+ * vers la souris, accélère au défilement, et se laisse tourner à la main (il
+ * revient dans l'axe quand on lâche).
  *
  * Éclairage : des panneaux de lumière déclarés ici (Lightformer), aucune image
  * HDR téléchargée. Le rendu s'arrête quand la scène sort de l'écran.
@@ -21,12 +22,14 @@ const MODEL = '/models/tarmac-box.glb';
 const POSTER = '/models/tarmac-box-poster.png';
 
 /** Le GLB est en mètres (62 mm hors tout) : on le ramène à ~2,5 unités. */
-const SCALE = 34;
+const SCALE = 46;
 /** Pose de repos : dessus, face avant et prise OBD visibles. */
 const REST = { x: 0.08, y: -0.55 };
 const INTRO_S = 1.6;
 const LOGO_GLOW = 0.55;
 const LED_GLOW = 1.2;
+/** Rotation du présentoir, en radians par seconde (un tour en ~14 s). */
+const SPIN = 0.45;
 
 const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 const smooth = (a: number, b: number, t: number) => {
@@ -41,6 +44,7 @@ function Box({ still }: { still: boolean }) {
   const { scene } = useGLTF(MODEL, false, true);
   const group = useRef<THREE.Group>(null);
   const scroll = useRef(0);
+  const spin = useRef(0);
 
   const parts = useMemo(() => {
     const emissive = (name: string) => {
@@ -58,16 +62,16 @@ function Box({ still }: { still: boolean }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const g = group.current;
     if (!g) return;
     const t = still ? 10 : state.clock.elapsedTime;
     const p = easeOut(t / INTRO_S);
     const idle = still ? 0 : 1;
+    // Le présentoir démarre en douceur à la fin de l'intro ; le défilement l'accélère.
+    if (!still) spin.current += Math.min(delta, 0.05) * SPIN * smooth(INTRO_S * 0.8, INTRO_S + 0.8, t) * (1 + scroll.current * 3);
 
-    g.rotation.y = THREE.MathUtils.lerp(REST.y - 2.4, REST.y, p)
-      + idle * (Math.sin(t * 0.45) * 0.1 + state.pointer.x * 0.3)
-      + scroll.current * 1.1;
+    g.rotation.y = THREE.MathUtils.lerp(REST.y - 2.4, REST.y, p) + spin.current + idle * state.pointer.x * 0.25;
     g.rotation.x = THREE.MathUtils.lerp(0.6, REST.x, p) - idle * state.pointer.y * 0.1;
     g.position.y = THREE.MathUtils.lerp(-1.4, 0, p) + idle * Math.sin(t * 1.1) * 0.035;
 
@@ -81,7 +85,7 @@ function Box({ still }: { still: boolean }) {
 
   return (
     <group ref={group}>
-      <primitive object={scene} scale={SCALE} position={[0, -0.3, 0]} />
+      <primitive object={scene} scale={SCALE} position={[0, -0.4, 0]} />
     </group>
   );
 }
@@ -140,7 +144,7 @@ export default function BoxScene() {
             dpr={[1, 2]}
             frameloop={visible ? 'always' : 'never'}
             shadows
-            camera={{ position: [0, 1.5, 5.2], fov: 30 }}
+            camera={{ position: [0, 1.7, 6.2], fov: 30 }}
             gl={{ antialias: true, alpha: true, toneMapping: THREE.NeutralToneMapping }}
             onCreated={({ camera }) => camera.lookAt(0, 0.05, 0)}
           >
@@ -158,7 +162,7 @@ export default function BoxScene() {
               >
                 <Box still={still} />
               </PresentationControls>
-              <ContactShadows position={[0, -0.55, 0]} opacity={0.55} scale={6} blur={2.6} far={1.6} color="#000000" />
+              <ContactShadows position={[0, -0.75, 0]} opacity={0.6} scale={8} blur={2.6} far={1.6} color="#000000" />
               <Ready onReady={() => setReady(true)} />
             </Suspense>
           </Canvas>

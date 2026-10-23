@@ -381,7 +381,7 @@ img, svg { display: block; }
 
 /* ─────────────────────────── Accueil ─────────────────────────── */
 
-.hero { padding-top: 72px; padding-bottom: 40px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; }
+.hero { padding-top: 72px; padding-bottom: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
 .hero .lead { font-size: 19px; color: var(--text3); max-width: 560px; }
 .kicker { color: var(--ok); font-weight: 700; font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase; }
 .phone {
@@ -512,9 +512,12 @@ table.tbl tr.click:hover td { background: #1b1d22; }
 .box-scene {
   position: relative;
   width: 100%;
-  max-width: 560px;
-  aspect-ratio: 1 / 0.9;
+  max-width: 640px;
+  aspect-ratio: 1 / 0.92;
   justify-self: center;
+  /* Déborde un peu de sa colonne : le boîtier est le sujet du hero. */
+  margin: -40px -40px -40px 0;
+  width: calc(100% + 40px);
   cursor: grab;
   touch-action: pan-y;
 }
@@ -535,6 +538,6 @@ table.tbl tr.click:hover td { background: #1b1d22; }
 .app-preview { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
 
 @media (max-width: 860px) {
-  .box-scene { max-width: 420px; }
+  .box-scene { max-width: 520px; margin: -24px auto 0; width: 100%; }
   .app-preview { grid-template-columns: 1fr; }
 }
