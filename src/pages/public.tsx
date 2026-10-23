@@ -8,6 +8,9 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { config } from '~/config';
 import { Card, GhostButton, PrimaryButton, StatusPill } from '~/ui/components';
+import {
+  Compatibility, DataPromise, Faq, FAQ_GENERAL, FAQ_INSTALL, FAQ_MAPPER, FinalCta, Figures, HowItWorks, SectionHead, TrustStrip,
+} from './sections';
 import { Download, Dongle, Inbox, Shield, Stopwatch, TabCharts, TabHealth, TabRanking, Users, Warning } from '~/ui/icons';
 
 // three.js n'est chargé que sur l'accueil, et après le reste de la page.
@@ -67,13 +70,17 @@ export function Home() {
             <PrimaryButton title="Télécharger l’app" icon={<Download />} href="/telecharger" />
             <GhostButton title="Je suis mappeur" to="/mappeurs" />
           </div>
+          <TrustStrip />
         </div>
         <Suspense fallback={<div className="box-scene"><img src="/models/tarmac-box-poster.png" alt="" className="box-poster" /></div>}>
           <BoxScene />
         </Suspense>
       </section>
 
-      <section className="wrap app-preview" style={{ paddingTop: 32, paddingBottom: 16 }}>
+      <Figures />
+      <HowItWorks />
+
+      <section className="wrap app-preview" style={{ paddingTop: 64, paddingBottom: 16 }}>
         <PhoneMock />
         <div className="stack-md">
           <span className="kicker">Dans l’app</span>
@@ -85,8 +92,8 @@ export function Home() {
         </div>
       </section>
 
-      <section className="wrap stack" style={{ gap: 20, paddingTop: 24 }}>
-        <p className="section">Ce que fait l’app</p>
+      <section className="wrap stack" style={{ gap: 20, paddingTop: 64 }} id="fonctionnalites">
+        <SectionHead kicker="Fonctionnalités" title="Tout ce qu’un préparateur regarde, dans ta poche" />
         <div className="grid3">
           <Feature icon={<Stopwatch />} title="Runs mesurés">
             Départ détecté tout seul, temps corrigés de la température et de la pression, intermédiaires et passages de rapport.
@@ -126,6 +133,11 @@ export function Home() {
           </div>
         </Card>
       </section>
+
+      <Compatibility />
+      <DataPromise />
+      <Faq items={FAQ_GENERAL} />
+      <FinalCta />
     </main>
   );
 }
@@ -187,6 +199,9 @@ export function Telecharger() {
         </div>
       </Card>
 
+      <div style={{ margin: '0 -20px' }}>
+        <Faq items={FAQ_INSTALL} kicker="Installation" title="Un souci à l’installation ?" id="installation" />
+      </div>
       <p className="dim small" style={{ margin: 0 }}>
         Déjà inscrit dans l’app ? Le même compte fonctionne ici : <Link to="/connexion" className="ok">connecte-toi</Link> pour retrouver tes logs et tes runs.
       </p>
@@ -222,10 +237,72 @@ export function Mappeurs() {
           </div>
         </div>
       </Card>
+      <div style={{ margin: '0 -20px' }}>
+        <Faq items={FAQ_MAPPER} kicker="Mappeurs" title="Les questions des préparateurs" id="faq-mappeur" />
+      </div>
       <p className="dim small" style={{ margin: 0 }}>
         Sécurité : seul le titulaire vérifié d’une adresse voit les logs qui lui sont adressés, en lecture seule. Le client
         peut retirer un partage à tout moment.
       </p>
+    </main>
+  );
+}
+
+export function Securite() {
+  const blocks: { t: string; p: string[] }[] = [
+    {
+      t: 'Ta voiture : lecture seule',
+      p: [
+        'Tout ce que l’app envoie au calculateur passe par un seul chemin, gardé par une liste blanche : lecture des grandeurs en direct, des codes défaut, des moniteurs et du numéro de série. Toute autre commande est refusée avant de partir vers la voiture.',
+        'La seule écriture possible est l’effacement des codes défaut, protégée par une confirmation explicite. Tarmac ne lit ni n’écrit jamais de cartographie.',
+      ],
+    },
+    {
+      t: 'Tes données : à toi seul',
+      p: [
+        'La base applique une sécurité au niveau de chaque ligne : un run, un log, un véhicule ne sont lisibles que par leur propriétaire. Cette règle vit dans la base de données, elle ne dépend pas du bon comportement de l’app ou du site.',
+        'Aucun mot de passe de base n’est embarqué dans l’app : elle présente un jeton de session à durée courte, et c’est la base qui décide de ce qu’il ouvre.',
+      ],
+    },
+    {
+      t: 'Le partage avec ton mappeur',
+      p: [
+        'Un log partagé est adressé à l’e-mail de ton préparateur. Seul le titulaire de cette adresse, confirmée par un code, peut le lire, et en lecture seule.',
+        'Tu vois à qui chaque log a été envoyé et tu retires l’accès en un clic.',
+      ],
+    },
+    {
+      t: 'Le classement',
+      p: ['Il n’expose que ton pseudo, ton temps, l’épreuve et la préparation. Ni VIN, ni position, ni identifiant de compte. Tu choisis d’y apparaître ou non.'],
+    },
+    {
+      t: 'Hébergement et transport',
+      p: ['Les données sont hébergées en Europe, à Francfort (Allemagne). Tous les échanges passent en HTTPS.'],
+    },
+  ];
+  return (
+    <main className="wrap stack" style={{ paddingTop: 48, gap: 20, maxWidth: 820 }}>
+      <span className="kicker">Sécurité et confidentialité</span>
+      <h1 className="h-display" style={{ fontSize: 44 }}>Conçu pour ne rien abîmer, ni ta voiture ni ta vie privée.</h1>
+      {blocks.map((b) => (
+        <Card key={b.t}>
+          <div className="stack-sm">
+            <div className="row8"><Shield size={20} color="var(--ok)" /><h2 className="h2" style={{ fontSize: 19 }}>{b.t}</h2></div>
+            {b.p.map((x) => <p key={x} style={{ margin: 0, color: 'var(--text3)' }}>{x}</p>)}
+          </div>
+        </Card>
+      ))}
+    </main>
+  );
+}
+
+export function NotFound() {
+  return (
+    <main className="wrap stack" style={{ paddingTop: 96, paddingBottom: 48, alignItems: 'center', textAlign: 'center', gap: 16 }}>
+      <div className="num-black ok" style={{ fontSize: 96, lineHeight: 1 }}>404</div>
+      <h1 className="h1">Hors piste.</h1>
+      <p className="dim" style={{ margin: 0 }}>Cette page n’existe pas, ou plus.</p>
+      <GhostButton title="Retour à l’accueil" to="/" />
     </main>
   );
 }

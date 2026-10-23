@@ -60,3 +60,13 @@ export interface VehicleRow {
   updated_at?: string;
   deleted_at?: string | null;
 }
+
+export interface MaintenanceRow {
+  id: string;
+  item_id: string;
+  done_at: string;
+  odometer_km: number | null;
+  note: string;
+  updated_at?: string;
+  deleted_at?: string | null;
+}

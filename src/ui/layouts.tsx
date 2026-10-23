@@ -9,7 +9,7 @@ import { auth, useAuth } from '~/auth/session';
 import { getProfile, mapperInbox, type ProfileRow } from '~/data/api';
 import { useQuery, type Query } from '~/data/useQuery';
 import { Loading } from './components';
-import { Car, Inbox, Logo, Logout, Stopwatch, TabCharts, TabRanking, Users, Gear } from './icons';
+import { Car, Gear, Inbox, Logo, Logout, Stopwatch, TabCharts, TabHealth, TabRanking, Users } from './icons';
 
 export function Brand() {
   return (
@@ -37,12 +37,28 @@ export function PublicLayout() {
       </header>
       <Outlet />
       <footer className="footer">
-        <div className="wrap between" style={{ flexWrap: 'wrap' }}>
-          <div className="row8"><Logo size={18} /><span>Tarmac — chronos, logs et santé moteur depuis la prise OBD.</span></div>
-          <div className="row12">
+        <div className="wrap footer-cols">
+          <div className="stack-sm">
+            <div className="row8" style={{ color: 'var(--text)' }}><Logo size={20} /><span className="bold">Tarmac</span></div>
+            <span>Chronos, logs et santé moteur depuis la prise OBD.</span>
+            <span>Lecture seule · données hébergées en Europe.</span>
+          </div>
+          <div>
+            <h4>Produit</h4>
+            <a href="/#fonctionnalites">Fonctionnalités</a>
             <Link to="/telecharger">Télécharger</Link>
             <Link to="/classement">Classement</Link>
-            <Link to="/mappeurs">Mappeurs</Link>
+          </div>
+          <div>
+            <h4>Mappeurs</h4>
+            <Link to="/mappeurs">Espace mappeur</Link>
+            <Link to="/connexion?mode=inscription&role=mappeur">Créer un compte mappeur</Link>
+          </div>
+          <div>
+            <h4>Aide</h4>
+            <a href="/#faq">Questions fréquentes</a>
+            <Link to="/securite">Sécurité et données</Link>
+            <Link to={user ? '/app' : '/connexion'}>{user ? 'Mon espace' : 'Connexion'}</Link>
           </div>
         </div>
       </footer>
@@ -88,6 +104,7 @@ export function AppLayout({ mode }: { mode: 'client' | 'mappeur' }) {
   const client: NavItem[] = [
     { to: '/app', label: 'Logs', icon: <TabCharts />, end: true },
     { to: '/app/runs', label: 'Runs', icon: <Stopwatch /> },
+    { to: '/app/sante', label: 'Santé', icon: <TabHealth /> },
     { to: '/app/garage', label: 'Garage', icon: <Car /> },
     { to: '/classement', label: 'Classement', icon: <TabRanking /> },
     { to: '/app/compte', label: 'Compte', icon: <Gear /> },
@@ -130,7 +147,8 @@ export function AppLayout({ mode }: { mode: 'client' | 'mappeur' }) {
           </div>
         </main>
         <nav className="bottom-nav">
-          {items.map((i) => (
+          {/* Cinq onglets au plus sur téléphone : le classement reste dans le menu du site. */}
+          {items.filter((i) => i.to !== '/classement').map((i) => (
             <NavLink key={i.to} to={i.to} end={i.end}>
               {i.icon}
               {i.label}

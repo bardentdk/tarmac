@@ -3,10 +3,10 @@
   "rewrites": [
     {
       "source": "/auth/:path*",
-      "destination": "https://ep-withered-waterfall-ba08w2lb.neonauth.c-8.eu-central-1.aws.neon.tech/neondb/auth/:path*"
+      "destination": "/api/auth/:path*"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]

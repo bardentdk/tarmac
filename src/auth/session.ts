@@ -51,6 +51,8 @@ const MESSAGES: Record<string, string> = {
   INVALID_OTP: 'Code incorrect. Vérifie l’e-mail reçu.',
   OTP_EXPIRED: 'Code expiré : demandes-en un nouveau.',
   TOO_MANY_ATTEMPTS: 'Trop d’essais : demande un nouveau code.',
+  INVALID_ORIGIN: 'Ce site n’est pas encore autorisé par le serveur de comptes (domaine de confiance Neon Auth manquant).',
+  INVALID_HOSTNAME: 'Le relais vers le serveur de comptes est mal configuré (en-tête d’hôte refusé).',
 };
 
 function jwtPayload(jwt: string): { exp?: number; sub?: string } {
@@ -131,9 +133,13 @@ class AuthManager {
     try { data = text ? JSON.parse(text) : null; } catch { /* corps non JSON */ }
 
     if (!response.ok) {
-      const body = (data ?? {}) as { code?: string; message?: string };
+      // Neon Auth répond selon les cas `message` ou `error` : on garde le code
+      // dans le texte, c'est lui qui permet de diagnostiquer.
+      const body = (data ?? {}) as { code?: string; message?: string; error?: string };
+      const detail = body.message || body.error;
       throw new AuthError(
-        (body.code && MESSAGES[body.code]) || body.message || `Refus du serveur (${response.status}).`,
+        (body.code && MESSAGES[body.code])
+          || (detail ? `${detail}${body.code ? ` (${body.code})` : ''}` : `Refus du serveur (${response.status}).`),
         body.code,
       );
     }

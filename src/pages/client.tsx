@@ -301,13 +301,14 @@ export function Runs() {
           <p className="section">{g.day}</p>
           <Card>
             {g.runs.map((r) => (
-              <div key={r.id} className="list-row">
+              <Link key={r.id} to={`/app/runs/${r.id}`} className="list-row">
                 <span className="num dim" style={{ width: 34 }}>#{r.number}</span>
                 <span className="semi" style={{ width: 70 }}>{modeLabel(r.mode)}</span>
                 <span className="dim small grow">{prepLabel(r.prep)}{r.trap_kph ? ` · ${r.trap_kph} km/h` : ''}{toNum(r.launch_slip_pct) ? ` · patinage ${frNum(toNum(r.launch_slip_pct)!, 0)} %` : ''}</span>
                 {r.aborted_reason ? <StatusPill tone="danger" label="INTERROMPU" /> : r.is_record ? <StatusPill tone="ok" label="RECORD" /> : null}
                 <span className="num" style={{ fontSize: 22, width: 76, textAlign: 'right' }}>{r.time_s ? frTime(r.time_s) : '—'}</span>
-              </div>
+                <ChevronRight size={16} color="var(--text2)" />
+              </Link>
             ))}
           </Card>
         </div>

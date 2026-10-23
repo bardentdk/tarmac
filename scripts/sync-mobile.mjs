@@ -10,8 +10,9 @@
  *   npm run sync:mobile            # copie depuis ../Tarmac/src
  *   npm run sync:mobile -- --check # échoue si une copie a divergé
  *
- * `rows.ts` est extrait de data/mappers.ts : seules les interfaces de lignes,
- * car le reste du fichier dépend du stockage du téléphone.
+ * `data/rows.ts` et `store/storage.ts` ne sont que des extraits : les
+ * interfaces de lignes de data/mappers.ts, et le type MaintenanceEntry du
+ * stockage. Le reste de ces fichiers dépend du téléphone (MMKV).
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,8 +23,8 @@ const MOBILE = process.env.MOBILE_SRC ?? join(ROOT, '..', 'Tarmac', 'src');
 const OUT = join(ROOT, 'src', 'shared');
 const check = process.argv.includes('--check');
 
-const FILES = ['log/logFormat.ts', 'obd/pids.ts', 'run/types.ts', 'run/splits.ts'];
-const ROWS = ['LogRow', 'RunRow', 'VehicleRow'];
+const FILES = ['log/logFormat.ts', 'obd/pids.ts', 'obd/dtcLibrary.ts', 'run/types.ts', 'run/splits.ts', 'health/maintenance.ts'];
+const ROWS = ['LogRow', 'RunRow', 'VehicleRow', 'MaintenanceRow'];
 
 if (!existsSync(MOBILE)) {
   console.error(`✖ Code mobile introuvable : ${MOBILE} (MOBILE_SRC pour un autre chemin).`);
@@ -44,6 +45,17 @@ outputs.set('data/rows.ts', [
   "import type { LogMarker, LogMeta } from '@/log/logFormat';",
   '',
   blocks.join('\n\n'),
+  '',
+].join('\n'));
+
+const storage = readFileSync(join(MOBILE, 'store/storage.ts'), 'utf8');
+const entry = storage.match(/export interface MaintenanceEntry \{[\s\S]*?\n\}/);
+if (!entry) throw new Error('Interface MaintenanceEntry absente de store/storage.ts');
+outputs.set('store/storage.ts', [
+  '// Généré par scripts/sync-mobile.mjs depuis Tarmac/src/store/storage.ts — ne pas modifier.',
+  '// Seul le type utilisé par health/maintenance.ts : le reste du fichier dépend du téléphone.',
+  '',
+  entry[0],
   '',
 ].join('\n'));
 

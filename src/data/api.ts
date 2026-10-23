@@ -7,11 +7,11 @@
  * modifie (véhicule, profil) redescend sur le téléphone à sa prochaine
  * synchronisation, puisque celle-ci suit `updated_at`, fixé par la base.
  */
-import type { LogRow, RunRow, VehicleRow } from '@/data/rows';
+import type { LogRow, MaintenanceRow, RunRow, VehicleRow } from '@/data/rows';
 import { auth } from '~/auth/session';
 import { callFunction, DataError, request, select } from './client';
 
-export type { LogRow, RunRow, VehicleRow };
+export type { LogRow, MaintenanceRow, RunRow, VehicleRow };
 
 export interface ProfileRow {
   owner_id: string;
@@ -122,6 +122,81 @@ export async function listMyVehicles(): Promise<VehicleRow[]> {
 
 export async function saveVehicle(row: Omit<VehicleRow, 'updated_at' | 'deleted_at'>): Promise<void> {
   await request('vehicles', { method: 'POST', body: [row], upsert: true });
+}
+
+export interface TelemetryRow {
+  ms: number[];
+  speed_kph: number[];
+  wheel_speed_kph: number[] | null;
+  distance_m: number[];
+  rpm: number[] | null;
+  boost_bar: number[] | null;
+  advance_deg: number[] | null;
+  iat_c: number[] | null;
+  gear: number[] | null;
+  throttle_pct: number[] | null;
+}
+
+export interface IncidentRow {
+  ms: number;
+  kind: 'knock' | 'retard' | 'slip' | 'lean' | 'overheat';
+  severity: 'info' | 'warn' | 'danger';
+  message: string;
+  value: string | number | null;
+}
+
+/** Un run, sa télémétrie et ses incidents (trois tables, lues en parallèle). */
+export async function getRun(id: string) {
+  const [runs, tele, incidents] = await Promise.all([
+    select<RunRow>('runs', { id: `eq.${id}`, deleted_at: 'is.null' }),
+    select<TelemetryRow>('run_telemetry', { run_id: `eq.${id}` }),
+    select<IncidentRow>('run_incidents', { run_id: `eq.${id}`, order: 'ms.asc' }),
+  ]);
+  return runs[0] ? { run: runs[0], telemetry: tele[0] ?? null, incidents } : null;
+}
+
+/* ─────────────────────────── Santé ─────────────────────────── */
+
+export interface DtcReadRow {
+  id: string;
+  read_at: string;
+  active: string[];
+  pending: string[];
+  permanent: string[];
+  mil_on: boolean;
+  cleared: boolean;
+}
+
+export async function listDtcReads(): Promise<DtcReadRow[]> {
+  const id = await me();
+  return select<DtcReadRow>('dtc_reads', {
+    owner_id: `eq.${id}`,
+    deleted_at: 'is.null',
+    select: 'id,read_at,active,pending,permanent,mil_on,cleared',
+    order: 'read_at.desc',
+    limit: '50',
+  });
+}
+
+export async function listMaintenance(): Promise<MaintenanceRow[]> {
+  const id = await me();
+  return select<MaintenanceRow>('maintenance_entries', {
+    owner_id: `eq.${id}`,
+    deleted_at: 'is.null',
+    order: 'done_at.desc',
+  });
+}
+
+export async function healthContext(): Promise<{ odometerKm: number | null; runCount: number }> {
+  const id = await me();
+  const [profile, stats] = await Promise.all([
+    select<{ odometer_km: number | null }>('profiles', { owner_id: `eq.${id}`, select: 'odometer_km' }),
+    callFunction<{ runs: number }[]>('my_run_stats'),
+  ]);
+  return {
+    odometerKm: profile[0]?.odometer_km ?? null,
+    runCount: stats.reduce((n, s) => n + Number(s.runs), 0),
+  };
 }
 
 /* ─────────────────────────── Classement ─────────────────────────── */
