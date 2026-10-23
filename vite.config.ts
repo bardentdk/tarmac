@@ -2,20 +2,19 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig, loadEnv } from 'vite'
 
-const mobileSrc = fileURLToPath(new URL('../Tarmac/src', import.meta.url))
 const webRoot = fileURLToPath(new URL('.', import.meta.url))
 const webSrc = `${webRoot}src`
 
 /**
  * Deux alias :
  *   · `~/` : le code du site ;
- *   · `@/` : le code métier de l'app mobile (format des logs, PID, codes
- *     défaut…), importé tel quel. Le site lit les mêmes fichiers que l'app :
- *     un log s'y décode exactement de la même façon.
+ *   · `@/` : le code métier de l'app mobile (format des logs, PID,
+ *     épreuves), recopié tel quel dans src/shared/ par `npm run sync:mobile`.
+ *     Un log s'y décode exactement comme dans l'app.
  *
  * `/auth` est relayé vers Neon Auth : le cookie de session devient ainsi un
  * cookie du site lui-même, que les navigateurs ne bloquent pas comme un
- * cookie tiers.
+ * cookie tiers. En production, c'est vercel.json qui fait ce relais.
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, webRoot, '')
@@ -33,12 +32,11 @@ export default defineConfig(({ mode }) => {
       dedupe: ['react', 'react-dom', 'three'],
       alias: [
         { find: /^~\//, replacement: `${webSrc}/` },
-        { find: /^@\//, replacement: `${mobileSrc}/` },
+        { find: /^@\//, replacement: `${webSrc}/shared/` },
       ],
     },
     server: {
       port: 5173,
-      fs: { allow: ['..'] },
       proxy: auth
         ? {
             '/auth': {

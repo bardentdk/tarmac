@@ -1,12 +1,13 @@
 /**
  * api.ts — ce que le site lit et écrit, table par table.
  *
- * Les types de lignes sont ceux de l'app mobile (Tarmac/src/data/mappers.ts) :
+ * Les types de lignes sont ceux de l'app mobile (Tarmac/src/data/mappers.ts,
+ * recopiés dans src/shared/data/rows.ts) :
  * le site et l'app parlent exactement la même langue à la base. Ce que le site
  * modifie (véhicule, profil) redescend sur le téléphone à sa prochaine
  * synchronisation, puisque celle-ci suit `updated_at`, fixé par la base.
  */
-import type { LogRow, RunRow, VehicleRow } from '@/data/mappers';
+import type { LogRow, RunRow, VehicleRow } from '@/data/rows';
 import { auth } from '~/auth/session';
 import { callFunction, DataError, request, select } from './client';
 

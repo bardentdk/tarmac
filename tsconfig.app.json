@@ -4,7 +4,7 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "esnext",
-    "types": ["vite/client", "node"],
+    "types": ["vite/client"],
     "skipLibCheck": true,
 
     "moduleResolution": "bundler",
@@ -15,7 +15,7 @@
     "jsx": "react-jsx",
     "paths": {
       "~/*": ["./src/*"],
-      "@/*": ["../Tarmac/src/*"]
+      "@/*": ["./src/shared/*"]
     },
 
     "strict": true,

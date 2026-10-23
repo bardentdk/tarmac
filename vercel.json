@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://ep-withered-waterfall-ba08w2lb.neonauth.c-8.eu-central-1.aws.neon.tech/neondb/auth/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
