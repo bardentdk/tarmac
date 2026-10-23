@@ -25,3 +25,8 @@ npm run build
 - **Variables.** `.env` ne contient que des valeurs publiques (`VITE_*`,
   embarquées dans le JS) et `TARMAC_AUTH_URL`, lue par le serveur de dev.
   Aucun secret (DATABASE_URL, Resend, Cloudflare) n'a sa place ici.
+- **Boîtier 3D (accueil).** `public/models/tarmac-box.glb` est le modèle de
+  `../tarmac-box/` compressé en Meshopt (`npx @gltf-transform/cli optimize …
+  --compress meshopt`). La scène (`src/ui/BoxScene.tsx`, three.js via
+  @react-three/fiber et drei) est chargée à la demande ; l'image
+  `tarmac-box-poster.png` s'affiche pendant le chargement ou sans WebGL.

@@ -506,3 +506,35 @@ table.tbl tr.click:hover td { background: #1b1d22; }
   .stat-row { grid-template-columns: 1fr 60px 60px 64px; font-size: 12px; }
   .wrap { padding: 0 16px; }
 }
+
+/* ─────────────────────────── Boîtier 3D ─────────────────────────── */
+
+.box-scene {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 1 / 0.9;
+  justify-self: center;
+  cursor: grab;
+  touch-action: pan-y;
+}
+.box-scene:active { cursor: grabbing; }
+.box-scene::before {
+  /* Halo vert au sol, sous le boîtier. */
+  content: '';
+  position: absolute;
+  inset: 30% 12% 8%;
+  background: radial-gradient(closest-side, rgba(198, 244, 50, 0.16), transparent);
+  filter: blur(18px);
+  pointer-events: none;
+}
+.box-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.box-canvas { position: absolute !important; inset: 0; opacity: 0; transition: opacity 420ms; }
+.box-canvas.ready { opacity: 1; }
+
+.app-preview { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center; }
+
+@media (max-width: 860px) {
+  .box-scene { max-width: 420px; }
+  .app-preview { grid-template-columns: 1fr; }
+}

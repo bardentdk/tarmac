@@ -4,11 +4,14 @@
  * Même ton que l'app : on dit ce que ça fait, franchement, sans inventer de
  * chiffres. La maquette de téléphone de l'accueil est marquée « exemple ».
  */
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { config } from '~/config';
 import { Card, GhostButton, PrimaryButton, StatusPill } from '~/ui/components';
 import { Download, Dongle, Inbox, Shield, Stopwatch, TabCharts, TabHealth, TabRanking, Users, Warning } from '~/ui/icons';
+
+// three.js n'est chargé que sur l'accueil, et après le reste de la page.
+const BoxScene = lazy(() => import('~/ui/BoxScene'));
 
 function Feature({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
@@ -65,7 +68,21 @@ export function Home() {
             <GhostButton title="Je suis mappeur" to="/mappeurs" />
           </div>
         </div>
+        <Suspense fallback={<div className="box-scene"><img src="/models/tarmac-box-poster.png" alt="" className="box-poster" /></div>}>
+          <BoxScene />
+        </Suspense>
+      </section>
+
+      <section className="wrap app-preview" style={{ paddingTop: 32, paddingBottom: 16 }}>
         <PhoneMock />
+        <div className="stack-md">
+          <span className="kicker">Dans l’app</span>
+          <h2 className="h1">Le chrono, puis le pourquoi.</h2>
+          <p className="dim" style={{ margin: 0, fontSize: 17, maxWidth: 520 }}>
+            Le temps en grand, les intermédiaires, le patinage au départ. Et quand le calculateur retire de l’avance,
+            l’app le voit, te dit à quel instant, et te propose d’envoyer le log à ton préparateur.
+          </p>
+        </div>
       </section>
 
       <section className="wrap stack" style={{ gap: 20, paddingTop: 24 }}>

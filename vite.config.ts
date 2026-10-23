@@ -25,7 +25,12 @@ export default defineConfig(({ mode }) => {
     root: webRoot,
     envDir: webRoot,
     plugins: [react()],
+    // Une seule copie de React et de three, pré-empaquetées ensemble : sans ça,
+    // la découverte tardive de three.js (page chargée à la demande) fait
+    // coexister deux React en dev.
+    optimizeDeps: { include: ['three', '@react-three/fiber', '@react-three/drei'] },
     resolve: {
+      dedupe: ['react', 'react-dom', 'three'],
       alias: [
         { find: /^~\//, replacement: `${webSrc}/` },
         { find: /^@\//, replacement: `${mobileSrc}/` },
